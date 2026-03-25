@@ -11,6 +11,7 @@ import (
 type Config struct {
 	DatabaseURL string
 	Port        string
+	JWTSecret   string
 }
 
 func LoadConfig() (*Config, error) {
@@ -22,10 +23,12 @@ func LoadConfig() (*Config, error) {
 	config := &Config{
 		DatabaseURL: os.Getenv("DATABASE_URL"),
 		Port:        os.Getenv("PORT"),
+		JWTSecret:   os.Getenv("JWT_SECRET"),
 	}
 
-	if config.DatabaseURL == "" || config.Port == "" {
+	if config.DatabaseURL == "" || config.Port == "" || config.JWTSecret == "" {
 		return nil, fmt.Errorf("missing required environment variables")
 	}
+
 	return config, nil
 }
