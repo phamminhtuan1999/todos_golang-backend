@@ -5,6 +5,7 @@ import (
 	"todos/internal/config"
 	"todos/internal/database"
 	"todos/internal/handlers"
+	"todos/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -40,19 +41,23 @@ func main() {
 		})
 	})
 
-	router.POST("/todos", handlers.CreateTodoHandler(db))
-
-	router.GET("/todos", handlers.GetTodosHandler(db))
-
-	router.GET("/todos/:id", handlers.GetTodoHandler(db))
-
-	router.PUT("/todos/:id", handlers.UpdateTodoHandler(db))
-
-	router.DELETE("/todos/:id", handlers.DeleteTodoHandler(db))
-
 	router.POST("/auth/register", handlers.CreateUserHandler(db))
 
 	router.POST("/auth/login", handlers.LoginHandler(db, cfg))
+
+	protected := router.Group("/todos")
+	protected.Use(middleware.AuthMiddleware(cfg))
+	{
+		protected.POST("", handlers.CreateTodoHandler(db))
+
+		protected.GET("", handlers.GetTodosHandler(db))
+
+		protected.GET("/:id", handlers.GetTodoHandler(db))
+
+		protected.PUT("/:id", handlers.UpdateTodoHandler(db))
+
+		protected.DELETE("/:id", handlers.DeleteTodoHandler(db))
+	}
 
 	router.Run(":" + cfg.Port)
 }

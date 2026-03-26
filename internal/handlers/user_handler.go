@@ -130,6 +130,23 @@ func LoginHandler(pool *pgxpool.Pool, cfg *config.Config) gin.HandlerFunc {
 	}
 }
 
+func TestHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user_id, exists := c.Get("user_id")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "User not found in context",
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Test successful",
+			"user_id": user_id,
+		})
+	}
+}
+
 func HashPassword(s string) string {
 	hash, err := bcrypt.GenerateFromPassword([]byte(s), bcrypt.DefaultCost)
 	if err != nil {
